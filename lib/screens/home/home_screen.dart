@@ -1,25 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pomodoro/constants.dart';
 import 'package:pomodoro/screens/home/components/input_timer.dart';
 import 'package:pomodoro/screens/home/components/timer.dart';
+import 'package:pomodoro/store/pomodoro_store.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.green[400],
-      appBar: _appBar(),
-      body: _body(),
-    );
+    final store = Provider.of<PomodoroStore>(context);
+    return Observer(builder: (_) {
+      return Scaffold(
+        backgroundColor: store.workType == WorkType.BREAK
+            ? Colors.green[400]
+            : Colors.red[400],
+        appBar: _appBar(),
+        body: _body(context),
+      );
+    });
   }
 
-  Column _body() {
+  Column _body(context) {
+    final store = Provider.of<PomodoroStore>(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Expanded(flex: 3, child: Timer()),
+        const Expanded(flex: 3, child: Timer()),
         Expanded(
           child: Container(
             padding: const EdgeInsets.all(kDefaultPadding * 3),
@@ -40,8 +50,18 @@ class HomeScreen extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                InputTimer(title: 'Trabalho', time: 25),
-                InputTimer(title: 'Descanso', time: 25),
+                InputTimer(
+                  title: 'Trabalho',
+                  time: store.workTime,
+                  onPressedAdd: store.addWorkTime,
+                  onPressedRemove: store.removeWorkTime,
+                ),
+                InputTimer(
+                  title: 'Descanso',
+                  time: store.breakTime,
+                  onPressedAdd: store.addBreakTime,
+                  onPressedRemove: store.removeBreakTime,
+                ),
               ],
             ),
           ),
